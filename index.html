@@ -531,13 +531,21 @@ footer .brand{font-size:1.1rem} footer .brand img{width:30px}
       // show the thank-you right away; the email is sent in the background (keepalive lets it finish even if the page is closed)
       done(true);
       if(!window.CK_LIVE){document.getElementById('fSentMsg').textContent='Preview only: on the live website these details are emailed to chargekaroo@gmail.com.';return}
-      var payload=JSON.stringify(data);
-      function send(tries){
-        fetch('https://formsubmit.co/ajax/chargekaroo@gmail.com',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','Accept':'application/json'},body:payload})
-          .then(function(r){if(!r.ok)throw 0})
-          .catch(function(){if(tries>0){setTimeout(function(){send(tries-1)},3000)}else{toast('Your details could not be sent. Please email chargekaroo@gmail.com or call +91 83095 15062.')}});
+      // 1) save the request in ChargeKaro's database (seen on the Admin panel's Partner requests page)
+      // 2) email it to chargekaroo@gmail.com. Both run in the background; the visitor is warned only if both fail.
+      var SB='https://uonxnnqyeubepfmvwmaf.supabase.co',SB_KEY='sb_publishable_INKJQ2FyfwZsZch_VETWsQ_jWZL1jOF';
+      var row={p_name:data.name,p_phone:data.phone,p_station:data.station,p_city:data.city,p_email:data.email||null,p_type:data.type||null,p_chargers:data.chargers||null,p_message:data.message||null};
+      var emailBody=JSON.stringify(data);
+      function post(url,headers,body,tries){
+        return fetch(url,{method:'POST',keepalive:true,headers:headers,body:body})
+          .then(function(r){if(!r.ok)throw 0;return true})
+          .catch(function(){return tries>0?new Promise(function(res){setTimeout(res,3000)}).then(function(){return post(url,headers,body,tries-1)}):false});
       }
-      send(1);
+      var saved=post(SB+'/rest/v1/rpc/submit_partner_request',{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY},JSON.stringify(row),1);
+      var mailed=post('https://formsubmit.co/ajax/chargekaroo@gmail.com',{'Content-Type':'application/json','Accept':'application/json'},emailBody,1);
+      Promise.all([saved,mailed]).then(function(r){
+        if(!r[0]&&!r[1])toast('Your details could not be sent. Please email chargekaroo@gmail.com or call +91 83095 15062.');
+      });
     });
   })();
 
