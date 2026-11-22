@@ -244,6 +244,8 @@ footer .brand{font-size:1.1rem} footer .brand img{width:30px}
 .hp{position:absolute;left:-9999px}
 @media (max-width:520px){.two{grid-template-columns:1fr}.sheet{padding:22px}}
 
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:120;max-width:min(520px,calc(100% - 32px));background:#B3261E;color:#fff;padding:14px 18px;border-radius:14px;box-shadow:var(--shadow);font-size:.95rem;animation:fadeUp .3s ease both}
+
 /* scroll reveal: only applied when JS runs, so the page is complete without it */
 .js .rv{opacity:0;transform:translateY(32px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
 .js .rv.in{opacity:1;transform:none}
@@ -456,6 +458,7 @@ footer .brand{font-size:1.1rem} footer .brand img{width:30px}
   </div>
 </div>
 
+<div class="toast" id="toast" role="alert" hidden></div>
 <script>
 (function(){
   try{history.scrollRestoration='manual'}catch(e){}
@@ -499,6 +502,7 @@ footer .brand{font-size:1.1rem} footer .brand img{width:30px}
 
   // partner form: opens in a pop-up and emails the details to chargekaroo@gmail.com via FormSubmit
   (function(){
+    function toast(t){var el=document.getElementById('toast');el.textContent=t;el.hidden=false;setTimeout(function(){el.hidden=true},9000)}
     var m=document.getElementById('formModal'),f=document.getElementById('partnerForm'),err=document.getElementById('fErr'),btn=document.getElementById('fSubmit'),last;
     function open(){last=document.activeElement;f.hidden=false;document.getElementById('fSent').hidden=true;m.hidden=false;document.body.style.overflow='hidden';setTimeout(function(){document.getElementById('fName').focus()},60)}
     function close(){m.hidden=true;document.body.style.overflow='';if(last)last.focus()}
@@ -513,7 +517,7 @@ footer .brand{font-size:1.1rem} footer .brand img{width:30px}
       var digits=document.getElementById('fPhone').value.replace(/\D/g,'');
       if(need.length){err.textContent='Please fill in your name, phone, station name and city.';err.hidden=false;document.getElementById(need[0]).focus();return}
       if(digits.length<10){err.textContent='Please enter a valid 10-digit phone number.';err.hidden=false;document.getElementById('fPhone').focus();return}
-      err.hidden=true;btn.disabled=true;btn.textContent='Sending...';
+      err.hidden=true;
       var data={};new FormData(f).forEach(function(v,k){data[k]=v});
       if(data.company_site){done(true);return}  // spam bot filled the hidden field
       delete data.company_site;
@@ -521,17 +525,19 @@ footer .brand{font-size:1.1rem} footer .brand img{width:30px}
       data._template='table';data._captcha='false';
       if(data.email)data._replyto=data.email;
       function done(ok){
-        btn.disabled=false;btn.textContent='Submit details';
         if(!ok){err.textContent='Could not send right now. Please try again, or write to chargekaroo@gmail.com.';err.hidden=false;return}
         f.reset();f.hidden=true;document.getElementById('fSent').hidden=false;
       }
-      // the preview page cannot reach the mail service; it works once the site is live
-      if(!window.CK_LIVE){
-        document.getElementById('fSentMsg').textContent='Preview only: on the live website these details are emailed to chargekaroo@gmail.com.';
-        setTimeout(function(){done(true)},600);return;
+      // show the thank-you right away; the email is sent in the background (keepalive lets it finish even if the page is closed)
+      done(true);
+      if(!window.CK_LIVE){document.getElementById('fSentMsg').textContent='Preview only: on the live website these details are emailed to chargekaroo@gmail.com.';return}
+      var payload=JSON.stringify(data);
+      function send(tries){
+        fetch('https://formsubmit.co/ajax/chargekaroo@gmail.com',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json','Accept':'application/json'},body:payload})
+          .then(function(r){if(!r.ok)throw 0})
+          .catch(function(){if(tries>0){setTimeout(function(){send(tries-1)},3000)}else{toast('Your details could not be sent. Please email chargekaroo@gmail.com or call +91 83095 15062.')}});
       }
-      fetch('https://formsubmit.co/ajax/chargekaroo@gmail.com',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(data)})
-        .then(function(r){return r.json().catch(function(){return {}}).then(function(j){done(r.ok&&String(j.success)!=='false'||/activat/i.test(j.message||''))})},function(){done(false)});
+      send(1);
     });
   })();
 
