@@ -246,6 +246,68 @@ footer .brand{font-size:1.1rem} footer .brand img{width:30px}
 
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:120;max-width:min(520px,calc(100% - 32px));background:#B3261E;color:#fff;padding:14px 18px;border-radius:14px;box-shadow:var(--shadow);font-size:.95rem;animation:fadeUp .3s ease both}
 
+/* phones: tighter rhythm, centred headings, two-column cards, a vertical "network" timeline */
+@media (max-width:600px){
+  section{padding-block:56px}
+  .head{margin-bottom:28px;text-align:center;justify-items:center;margin-inline:auto}
+  .lead{font-size:1.05rem}
+  h2{font-size:clamp(1.7rem,7.4vw,2.1rem)}
+  .top .wrap{height:68px} nav.links{top:68px}
+  .brand img{width:40px} .brand{font-size:1.35rem}
+
+  .hero{padding-block:28px 40px}
+  .hero .wrap{gap:12px}
+  .hero-copy{text-align:center;justify-items:center;gap:18px}
+  .hero h1{font-size:clamp(2.5rem,12vw,3.1rem)}
+  .hero .lead{max-width:32ch}
+  .ctas{display:grid;grid-template-columns:1fr 1fr;width:100%;gap:10px}
+  .ctas .btn{justify-content:center;padding:14px 10px;font-size:.95rem}
+  .scene{margin-inline:-16px}
+  .ticket{position:relative;right:auto;bottom:auto;margin:-28px auto 0;width:min(300px,86%)}
+
+  .flow{grid-template-columns:1fr;gap:26px;position:relative;max-width:420px;margin-inline:auto}
+  .flow::before{content:"";position:absolute;left:31px;top:32px;bottom:32px;width:3px;border-radius:3px;background:linear-gradient(180deg,var(--line) 0 40%,var(--leaf-fill) 50%,var(--line) 60% 100%);background-size:100% 300%;animation:pulseDown 2.4s linear infinite}
+  .wire{display:none}
+  .node{grid-template-columns:64px 1fr;column-gap:16px;row-gap:2px;text-align:left;justify-items:start;align-items:center;padding:0;position:relative}
+  .node .orb{grid-row:1/3;width:64px;height:64px}
+  .node .orb svg{width:28px;height:28px}
+  .node.mid .orb{width:64px;height:64px;margin:0}
+  .node.mid .orb img{width:44px}
+  .node.mid .orb::before,.node.mid .orb::after{inset:-4px}
+  .node h3{align-self:end;font-size:1.1rem}
+  .node p{align-self:start;max-width:none;font-size:.93rem}
+  .net-note{margin-top:28px}
+  .net-note span{font-size:.85rem;padding:8px 12px}
+
+  .feats{grid-template-columns:1fr 1fr;gap:12px}
+  .card{padding:18px 14px;gap:8px;border-radius:18px}
+  .card .ic{width:44px;height:44px;border-radius:12px}
+  .card .ic svg{width:22px;height:22px}
+  .card h3{font-size:1rem;line-height:1.2}
+  .card p{font-size:.86rem;line-height:1.45}
+  .extras{margin-top:20px}
+
+  .partner .wrap{gap:28px}
+  .partner .wrap > div:first-child{text-align:center}
+  .partner .lead{margin-inline:auto}
+  .perks{grid-template-columns:1fr 1fr;gap:10px;margin-top:24px;text-align:left}
+  .perks li{flex-direction:column;gap:8px;padding:14px}
+  .perks b{font-size:.95rem}
+  .perks span{font-size:.85rem}
+  .join{padding:24px 20px;border-radius:20px}
+  .join .btns .btn{width:100%;justify-content:center}
+
+  .contact .wrap{gap:24px}
+  .ccard{padding:14px;gap:12px}
+  .ccard .ic{width:42px;height:42px}
+  .ccard a{font-size:.9rem}
+  .copy{padding:7px 10px}
+
+  footer .wrap{flex-direction:column;text-align:center;gap:8px}
+}
+@media (max-width:360px){.feats,.perks{grid-template-columns:1fr}.ctas{grid-template-columns:1fr}}
+@keyframes pulseDown{from{background-position:0 100%}to{background-position:0 0}}
+
 /* scroll reveal: only applied when JS runs, so the page is complete without it */
 .js .rv{opacity:0;transform:translateY(32px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
 .js .rv.in{opacity:1;transform:none}
